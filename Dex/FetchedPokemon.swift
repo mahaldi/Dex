@@ -52,8 +52,8 @@ struct FetchedPokemon: Decodable {
         var decodedTypes: [String] = []
         var typesContainer = try container.nestedUnkeyedContainer(forKey: .types) // ini di array types
         while !typesContainer.isAtEnd { // looping array types
-            let typesDictionaryContainer = try typesContainer.nestedContainer(keyedBy: CodingKeys.TypeDictionaryKeys.self)
-            let typeContainer = try typesDictionaryContainer.nestedContainer(keyedBy: CodingKeys.TypeDictionaryKeys.typeKeys.self, forKey: .type)
+            let typesDictionaryContainer = try typesContainer.nestedContainer(keyedBy: CodingKeys.TypeDictionaryKeys.self) // ini baru masuk kedalam object didalam array, belom di type nya
+            let typeContainer = try typesDictionaryContainer.nestedContainer(keyedBy: CodingKeys.TypeDictionaryKeys.typeKeys.self, forKey: .type) // ini pas di object type
             
             let type = try typeContainer.decode(String.self, forKey: .name)
             decodedTypes.append(type)
