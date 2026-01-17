@@ -19,15 +19,41 @@ struct ContentView: View {
     let fetcher = FetchService()
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 ForEach(Pokedex) { pokemon in
-                    NavigationLink {
-                        Text(pokemon.name ?? "NA")
-                    } label: {
-                        Text(pokemon.name ?? "NA")
+                    NavigationLink(value: pokemon) {
+                        AsyncImage(url: pokemon.sprite) { img in
+                            img.resizable()
+                                .scaledToFit()
+                        } placeholder: {
+                            ProgressView()
+                        }
+                        .frame(width: 100, height: 100)
+                        
+                        VStack(alignment: .leading) {
+                            Text(pokemon.name!.capitalized) // make "!" karena untuk nge force udh pasti ada name nya, dan aneh nya klo ga make "!" ga muncul error tapi preview nya ga jalan dan stuck
+                                .fontWeight(.bold)
+                            HStack {
+                                ForEach(pokemon.types!, id: \.self) { type in
+                                    Text(type.capitalized)
+                                        .font(.caption)
+                                        .fontWeight(.semibold)
+                                        .foregroundStyle(.black)
+                                        .padding(.horizontal, 13)
+                                        .padding(.vertical, 5)
+                                        .background(Color(type.capitalized))
+                                        .clipShape(.capsule)
+                                    
+                                }
+                            }
+                        }
                     }
                 }
+            }
+            .navigationTitle("Pokedex")
+            .navigationDestination(for: Pokemon.self) { pokemon in // cara lain untuk munculin page dari navigation link
+                Text(pokemon.name ?? "NA")
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -39,7 +65,6 @@ struct ContentView: View {
                     }
                 }
             }
-            Text("Select an item")
         }
     }
     
