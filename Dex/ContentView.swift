@@ -11,12 +11,30 @@ import CoreData
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Pokemon.id, ascending: true)],
+    @FetchRequest<Pokemon>(
+        sortDescriptors: [SortDescriptor(\.id)],
         animation: .default)
-    private var Pokedex: FetchedResults<Pokemon>
+    private var Pokedex // cara lainnya adalah private var Pokedex: FetchedResults<Pokemon> , lalu hapus <Pokemon> pada FetchRequest diatas, cara yang saat ini dipakai adalah shorthand nya, artinya adalah Pokedex akan menjadi wrapper value dari FetchRequest, jadi variable setelah FetchRequest akan otomatis menjadi wrapper value dari FetchRequest
+    
+    @State private var searchText = ""
     
     let fetcher = FetchService()
+    
+    private var dynamicPredicate: NSPredicate {
+        var predicates: [NSPredicate] = []
+        
+        // search predicate
+        if !searchText.isEmpty {
+            // name ini adalah property dari data,[c] maksudnya adalah insensitife case, lalu %@ adalah binding yang make @
+            predicates.append(NSPredicate(format: "name contains[c] %@", searchText))
+        }
+        
+        // filter by favorite predicate
+        
+        // combine predicates
+        
+        return NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+    }
 
     var body: some View {
         NavigationStack {
@@ -52,6 +70,11 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("Pokedex")
+            .searchable(text: $searchText, prompt: "Find a pokemon")
+            .autocorrectionDisabled()
+            .onChange(of: searchText) {
+                Pokedex.nsPredicate = dynamicPredicate
+            }
             .navigationDestination(for: Pokemon.self) { pokemon in // cara lain untuk munculin page dari navigation link
                 Text(pokemon.name ?? "NA")
             }
