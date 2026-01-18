@@ -41,79 +41,102 @@ struct ContentView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(Pokedex) { pokemon in
-                    NavigationLink(value: pokemon) {
-                        AsyncImage(url: pokemon.sprite) { img in
-                            img.resizable()
-                                .scaledToFit()
-                        } placeholder: {
-                            ProgressView()
-                        }
-                        .frame(width: 100, height: 100)
-                        
-                        VStack(alignment: .leading) {
-                            HStack {
-                                Text(pokemon.name!.capitalized) // make "!" karena untuk nge force udh pasti ada name nya, dan aneh nya klo ga make "!" ga muncul error tapi preview nya ga jalan dan stuck
-                                    .fontWeight(.bold)
-                                if pokemon.favorite {
-                                    Image(systemName: "star.fill")
-                                        .foregroundColor(.yellow)
+        if Pokedex.isEmpty {
+            ContentUnavailableView {
+                Label("No Pokemon", image: .nopokemon)
+            } description: {
+                Text("There are no Pokemon in your Pokedex yet. Go catch 'em!")
+            } actions: {
+                Button("Fetch Pokemon", systemImage: "antenna.radiowaves.left.and.right") {
+                    getPokemon(from: 1)
+                }
+                .buttonStyle(.borderedProminent)
+            }
+        } else {
+            NavigationStack {
+                List {
+                    Section {
+                        ForEach(Pokedex) { pokemon in
+                            NavigationLink(value: pokemon) {
+                                AsyncImage(url: pokemon.sprite) { img in
+                                    img.resizable()
+                                        .scaledToFit()
+                                } placeholder: {
+                                    ProgressView()
+                                }
+                                .frame(width: 100, height: 100)
+                                
+                                VStack(alignment: .leading) {
+                                    HStack {
+                                        Text(pokemon.name!.capitalized) // make "!" karena untuk nge force udh pasti ada name nya, dan aneh nya klo ga make "!" ga muncul error tapi preview nya ga jalan dan stuck
+                                            .fontWeight(.bold)
+                                        if pokemon.favorite {
+                                            Image(systemName: "star.fill")
+                                                .foregroundColor(.yellow)
+                                        }
+                                    }
+                                    HStack {
+                                        ForEach(pokemon.types!, id: \.self) { type in
+                                            Text(type.capitalized)
+                                                .font(.caption)
+                                                .fontWeight(.semibold)
+                                                .foregroundStyle(.black)
+                                                .padding(.horizontal, 13)
+                                                .padding(.vertical, 5)
+                                                .background(Color(type.capitalized))
+                                                .clipShape(.capsule)
+                                            
+                                        }
+                                    }
                                 }
                             }
-                            HStack {
-                                ForEach(pokemon.types!, id: \.self) { type in
-                                    Text(type.capitalized)
-                                        .font(.caption)
-                                        .fontWeight(.semibold)
-                                        .foregroundStyle(.black)
-                                        .padding(.horizontal, 13)
-                                        .padding(.vertical, 5)
-                                        .background(Color(type.capitalized))
-                                        .clipShape(.capsule)
-                                    
+                        }
+                    } footer: {
+                        if Pokedex.count < 151 {
+                            ContentUnavailableView {
+                                Label("Missing Pokemon", image: .nopokemon)
+                            } description: {
+                                Text("The Fetch was interrupted! \n Fetch the rest of Pokemon")
+                            } actions: {
+                                Button("Fetch Pokemon", systemImage: "antenna.radiowaves.left.and.right") {
+                                    getPokemon(from: Pokedex.count + 1)
                                 }
+                                .buttonStyle(.borderedProminent)
                             }
                         }
                     }
                 }
-            }
-            .navigationTitle("Pokedex")
-            .searchable(text: $searchText, prompt: "Find a pokemon")
-            .autocorrectionDisabled()
-            .onChange(of: searchText) {
-                Pokedex.nsPredicate = dynamicPredicate
-            }
-            .onChange(of: filterByFavorite) {
-                Pokedex.nsPredicate = dynamicPredicate
-            }
-            .navigationDestination(for: Pokemon.self) { pokemon in // cara lain untuk munculin page dari navigation link
-                Text(pokemon.name ?? "NA")
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        filterByFavorite.toggle()
-                    } label: {
-                    Label("Filter by Favorite", systemImage: filterByFavorite ? "star.fill" : "star")
-                    }
-                    .tint(.yellow)
+                .navigationTitle("Pokedex")
+                .searchable(text: $searchText, prompt: "Find a pokemon")
+                .autocorrectionDisabled()
+                .onChange(of: searchText) {
+                    Pokedex.nsPredicate = dynamicPredicate
                 }
-                ToolbarItem {
-                    Button("Add Item", systemImage: "plus") {
-                        getPokemon()
+                .onChange(of: filterByFavorite) {
+                    Pokedex.nsPredicate = dynamicPredicate
+                }
+                .navigationDestination(for: Pokemon.self) { pokemon in // cara lain untuk munculin page dari navigation link
+                    Text(pokemon.name ?? "NA")
+                }
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
+                            filterByFavorite.toggle()
+                        } label: {
+                            Label("Filter by Favorite", systemImage: filterByFavorite ? "star.fill" : "star")
+                        }
+                        .tint(.yellow)
                     }
                 }
             }
         }
     }
     
-    private func getPokemon() {
+    private func getPokemon(from id: Int) {
         Task {
-            for id in 1..<152 {
+            for idPokemon in id..<152 {
                 do {
-                    let fetchedPokemon = try await fetcher.fetchPokemon(id)
+                    let fetchedPokemon = try await fetcher.fetchPokemon(idPokemon)
                     
                     let pokemon = Pokemon(context: viewContext)
                     pokemon.id = fetchedPokemon.id
