@@ -17,6 +17,7 @@ struct ContentView: View {
     private var Pokedex // cara lainnya adalah private var Pokedex: FetchedResults<Pokemon> , lalu hapus <Pokemon> pada FetchRequest diatas, cara yang saat ini dipakai adalah shorthand nya, artinya adalah Pokedex akan menjadi wrapper value dari FetchRequest, jadi variable setelah FetchRequest akan otomatis menjadi wrapper value dari FetchRequest
     
     @State private var searchText = ""
+    @State private var filterByFavorite: Bool = false
     
     let fetcher = FetchService()
     
@@ -30,6 +31,9 @@ struct ContentView: View {
         }
         
         // filter by favorite predicate
+        if filterByFavorite {
+            predicates.append(NSPredicate(format: "favorite == %d", true))
+        }
         
         // combine predicates
         
@@ -50,8 +54,14 @@ struct ContentView: View {
                         .frame(width: 100, height: 100)
                         
                         VStack(alignment: .leading) {
-                            Text(pokemon.name!.capitalized) // make "!" karena untuk nge force udh pasti ada name nya, dan aneh nya klo ga make "!" ga muncul error tapi preview nya ga jalan dan stuck
-                                .fontWeight(.bold)
+                            HStack {
+                                Text(pokemon.name!.capitalized) // make "!" karena untuk nge force udh pasti ada name nya, dan aneh nya klo ga make "!" ga muncul error tapi preview nya ga jalan dan stuck
+                                    .fontWeight(.bold)
+                                if pokemon.favorite {
+                                    Image(systemName: "star.fill")
+                                        .foregroundColor(.yellow)
+                                }
+                            }
                             HStack {
                                 ForEach(pokemon.types!, id: \.self) { type in
                                     Text(type.capitalized)
@@ -75,12 +85,20 @@ struct ContentView: View {
             .onChange(of: searchText) {
                 Pokedex.nsPredicate = dynamicPredicate
             }
+            .onChange(of: filterByFavorite) {
+                Pokedex.nsPredicate = dynamicPredicate
+            }
             .navigationDestination(for: Pokemon.self) { pokemon in // cara lain untuk munculin page dari navigation link
                 Text(pokemon.name ?? "NA")
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+                    Button {
+                        filterByFavorite.toggle()
+                    } label: {
+                    Label("Filter by Favorite", systemImage: filterByFavorite ? "star.fill" : "star")
+                    }
+                    .tint(.yellow)
                 }
                 ToolbarItem {
                     Button("Add Item", systemImage: "plus") {
@@ -109,6 +127,10 @@ struct ContentView: View {
                     pokemon.defense = fetchedPokemon.defense
                     pokemon.sprite = fetchedPokemon.sprite
                     pokemon.shiny = fetchedPokemon.shiny
+                    
+                    if pokemon.id % 2 == 0 {
+                        pokemon.favorite = true
+                    }
                     
                     try viewContext.save()
                 } catch {
