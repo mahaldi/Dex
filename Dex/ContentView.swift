@@ -130,7 +130,7 @@ struct ContentView: View {
                     Pokedex.nsPredicate = dynamicPredicate
                 }
                 .navigationDestination(for: Pokemon.self) { pokemon in // cara lain untuk munculin page dari navigation link
-                    Text(pokemon.name ?? "NA")
+                    PokemonDetail().environmentObject(pokemon)
                 }
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
