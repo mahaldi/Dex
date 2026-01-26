@@ -8,6 +8,22 @@
 import SwiftUI
 
 extension Pokemon {
+    var spriteImage: Image {
+        // klo ada value sprite maka value nya masuk ke variable data, lalu gunakan data tersebut utk di convert ke Image masukkan ke variable image
+        if let data = sprite, let image = UIImage(data: data) {
+            Image(uiImage: image)
+        } else {
+            Image(.bulbasaur)
+        }
+    }
+    
+    var shinyImage: Image {
+        if let data = shiny, let image = UIImage(data: data) {
+            Image(uiImage: image)
+        } else {
+            Image(.shinybulbasaur)
+        }
+    }
     var background: ImageResource {
         switch types![0] {
         case "rock", "ground", "steel", "fighting", "ghost", "psyhic":

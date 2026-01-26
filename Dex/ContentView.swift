@@ -60,14 +60,21 @@ struct ContentView: View {
                     Section {
                         ForEach(Pokedex) { pokemon in
                             NavigationLink(value: pokemon) {
-                                AsyncImage(url: pokemon.spriteURL) { img in
-                                    img.resizable()
+                                if pokemon.sprite == nil {
+                                    AsyncImage(url: pokemon.spriteURL) { img in
+                                        img.resizable()
+                                            .scaledToFit()
+                                    } placeholder: {
+                                        ProgressView()
+                                    }
+                                    .frame(width: 100, height: 100)
+                                } else {
+                                    // ini dari computed property di PokemonExt
+                                    pokemon.spriteImage
+                                        .resizable()
                                         .scaledToFit()
-                                } placeholder: {
-                                    ProgressView()
+                                        .frame(width: 100, height: 100)
                                 }
-                                .frame(width: 100, height: 100)
-                                
                                 VStack(alignment: .leading) {
                                     HStack {
                                         Text(pokemon.name!.capitalized) // make "!" karena untuk nge force udh pasti ada name nya, dan aneh nya klo ga make "!" ga muncul error tapi preview nya ga jalan dan stuck
