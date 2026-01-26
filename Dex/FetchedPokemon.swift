@@ -59,6 +59,15 @@ struct FetchedPokemon: Decodable {
             decodedTypes.append(type)
         }
         
+        if decodedTypes.count == 2 && decodedTypes[0] == "normal" {
+            let tempType = decodedTypes[0]
+            decodedTypes[0] = decodedTypes[1]
+            decodedTypes[1] = tempType
+            
+            // cara shorthand nya
+            // decodedTypes.swapAt(0, 1)
+        }
+        
         self.types = decodedTypes
         
         var decodedStats: [Int16] = []
