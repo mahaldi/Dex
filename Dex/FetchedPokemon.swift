@@ -17,8 +17,8 @@ struct FetchedPokemon: Decodable {
     let specialAttack: Int16
     let specialDefense: Int16
     let speed: Int16
-    let sprite: URL
-    let shiny: URL
+    let spriteURL: URL
+    let shinyURL: URL
     
     enum CodingKeys: CodingKey {
         case id
@@ -40,8 +40,8 @@ struct FetchedPokemon: Decodable {
         }
         
         enum SpriteKeys: String, CodingKey {
-            case sprite = "frontDefault" // karena di json datanya front_default, dan disini pengennya mapping nya dengan key sprite, kalau yang lain nya ga ada raw value nya karena make key yang sama dengan case nya. misal case name ga ada raw value nya karena di json nya juga cuma name doang
-            case shiny = "frontShiny"
+            case spriteURL = "frontDefault" // karena di json datanya front_default, dan disini pengennya mapping nya dengan key sprite, kalau yang lain nya ga ada raw value nya karena make key yang sama dengan case nya. misal case name ga ada raw value nya karena di json nya juga cuma name doang
+            case shinyURL = "frontShiny"
         }
     }
     
@@ -87,7 +87,7 @@ struct FetchedPokemon: Decodable {
         self.speed = decodedStats[5]
         
         let spriteContainer = try container.nestedContainer(keyedBy: CodingKeys.SpriteKeys.self, forKey: .sprites)
-        self.sprite = try spriteContainer.decode(URL.self, forKey: .sprite)
-        self.shiny = try spriteContainer.decode(URL.self, forKey: .shiny)
+        self.spriteURL = try spriteContainer.decode(URL.self, forKey: .spriteURL)
+        self.shinyURL = try spriteContainer.decode(URL.self, forKey: .shinyURL)
     }
 }

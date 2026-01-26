@@ -22,7 +22,7 @@ struct PokemonDetail: View {
                     .resizable()
                     .scaledToFit()
                     .shadow(color: .black, radius: 4)
-                AsyncImage(url: showShiny ? pokemon.shiny : pokemon.sprite) { image in
+                AsyncImage(url: showShiny ? pokemon.shinyURL : pokemon.spriteURL) { image in
                     image
                         .interpolation(.none)
                         .resizable()
@@ -76,7 +76,7 @@ struct PokemonDetail: View {
                 Button {
                     showShiny.toggle()
                 } label: {
-                    Image(systemName: showShiny ? "want.and.stars":"wand.and.stars.inverse")
+                    Image(systemName: showShiny ? "wand.and.stars":"wand.and.stars.inverse")
                         .tint(showShiny ? .yellow : .primary)
                 }
             }
